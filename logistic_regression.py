@@ -57,22 +57,17 @@ def do_experiments(start, end, step_num):
         # Fit logistic regression model and extract coefficients
         model, beta0, beta1, beta2 = fit_logistic_regression(X, y)
         
-        # Calculate slope and intercept for the decision boundary
-        slope = -beta1 / beta2
-        intercept = -beta0 / beta2
-        
         beta0_list.append(beta0)
         beta1_list.append(beta1)
         beta2_list.append(beta2)
-        slope_list.append(slope)
-        intercept_list.append(slope)
 
         # Implement: Plot the dataset
         plt.subplot(n_rows, n_cols, i)
-        plt.scatter(X[:,0], X[:, 1], c=y, cmap='bwr', alpha=0.5)
+        plt.scatter(X[y == 0][:, 0], X[y == 0][:, 1], color='blue', label='Class 0', alpha=0.7)
+        plt.scatter(X[y == 1][:, 0], X[y == 1][:, 1], color='red', label='Class 1', alpha=0.7)
 
         # Implement: Calculate and store logistic loss
-        loss = -np.mean(y * np.log(model.predict_proba(X)[:, 1]) + (1 - y) * np.log(1 - model.predict_proba(X)[:, 1]))
+        loss = -model.score(X,y)
         loss_list.append(loss)
 
         # Calculate margin width between 70% confidence contours for each class
@@ -81,6 +76,12 @@ def do_experiments(start, end, step_num):
         xx, yy = np.meshgrid(np.linspace(x_min, x_max, 200), np.linspace(y_min, y_max, 200))
         Z = model.predict_proba(np.c_[xx.ravel(), yy.ravel()])[:, 1]
         Z = Z.reshape(xx.shape)
+        
+        # Calculate slope and intercept for the decision boundary
+        slope = -(beta1 / beta2)
+        intercept = -(beta0 / beta2)
+        slope_list.append(slope)
+        intercept_list.append(intercept)
 
         # Implement: Calculate decision boundary slope and intercept      
         x_values = np.linspace(x_min, x_max, 200)
@@ -101,6 +102,8 @@ def do_experiments(start, end, step_num):
         plt.title(f"Shift Distance = {distance}", fontsize=24)
         plt.xlabel("x1")
         plt.ylabel("x2")
+        plt.xlim(x_min, x_max)
+        plt.ylim(y_min, y_max)
 
         # Display decision boundary equation and margin width on the plot
         equation_text = f"{beta0:.2f} + {beta1:.2f} * x1 + {beta2:.2f} * x2 = 0\nx2 = {slope:.2f} * x1 + {intercept:.2f}"
